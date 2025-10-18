@@ -4,47 +4,57 @@ import {Catalog} from './components/base/models/catalog';
 import {Customer} from './components/base/models/customer';
 import { apiProducts } from './utils/data';
 import { Item } from './types';
+import { ApiCommunication } from './components/base/communication/order';
+import { Api } from './components/base/Api';
+import { API_URL } from './utils/constants';
+
 
 const initialItems: Item [] = [];
 const cartModel = new Cart(initialItems);
 const catalogModel = new Catalog(apiProducts.items, null);
 const customerModel = new Customer();
+const api = new Api(API_URL);
+const order = new ApiCommunication(api);
 
-cartModel.getItems();
+console.log('Массив товаров, находящихся в корзине:',  cartModel.getItems());
 cartModel.addItem(apiProducts.items[0]);
+cartModel.addItem(apiProducts.items[1]);
+console.log('Добавляем товар в корзину:', apiProducts.items[0], apiProducts.items[1], cartModel.getItems());
 cartModel.removeItem(apiProducts.items[0]);
-cartModel.clearCart();
-cartModel.getTotalPrice();
+console.log('Удаляем товар из корзины:', apiProducts.items[0], cartModel.getItems());
+console.log('Получаем итоговую стоимость всех товаров в корзине:',  cartModel.getTotalPrice());
 cartModel.getItemCounter();
-cartModel.hasItemById(apiProducts.items[0].id);
+console.log('Количество товаров в корзине:',  cartModel.getItemCounter());
+console.log('Проверяем наличие товара по его id:',  apiProducts.items[1].id, cartModel.hasItemById(apiProducts.items[1].id));
+cartModel.clearCart();
+console.log('Очищаем корзину:', cartModel.getItems());
+
 
 catalogModel.saveItems(apiProducts.items);
-catalogModel.getItems();
-catalogModel.getItemById(apiProducts.items[0].id);
-catalogModel.setSelectedProduct(apiProducts.items[0]);
-catalogModel.getSelectedProduct();
+console.log('Cохранение массива товаров из каталога:',  apiProducts.items, catalogModel.getItems());
+console.log('Массив товаров из каталога:', catalogModel.getItems());
+console.log('Получение одного товара по его id:', apiProducts.items[0].id,  catalogModel.getItemById(apiProducts.items[0].id));
+catalogModel.setSelectedProduct(apiProducts.items[0])
+console.log('Сохранение товара для подробного отображения:', apiProducts.items[0], catalogModel.getSelectedProduct());
 
+
+console.log('Получаем все данные, введенные покупателем:',  customerModel.getAllData());
 customerModel.updateData('card','г. Санкт-Петербург, ул. Конюшенная, 25 ' ,'+79992688546', 'maxim.dorokhov@mail.ru');
-customerModel.getAllData();
+console.log('Сохраняем введенные данные:',  customerModel.getAllData());
+console.log('Валидируем данные введенные покупателем:',  customerModel.validateData());
 customerModel.clearData();
-customerModel.validateData();
-
-console.log(`Массив товаров из каталога:  ${catalogModel.getItems()}`);
-console.log(`Cохранение массива товаров из каталога:  ${catalogModel.saveItems(apiProducts.items)}`);
-console.log(`Получение одного товара по его id:  ${catalogModel.getItemById(apiProducts.items[0].id)}`);
-console.log(`Сохранение товара для подробного отображения:  ${catalogModel.setSelectedProduct(apiProducts.items[0])}`);
-console.log(`Получение товара для подробного отображения:  ${catalogModel.getSelectedProduct()}`);
-console.log(`Массив товаров, находящихся в корзине:  ${cartModel.getItems()}`);
-console.log(`Добавляем товар в корзину:  ${cartModel.addItem(apiProducts.items[0])}`);
-console.log(`Удаляем товар из корзины:  ${cartModel.removeItem(apiProducts.items[0])}`);
-console.log(`Очищаем корзину:  ${cartModel.clearCart()}`);
-console.log(`Получаем итоговую стоимость всех товаров в корзине:  ${cartModel.getTotalPrice()}`);
-console.log(`Количество товаров в корзине:  ${cartModel.getItemCounter()}`);
-console.log(`Проверяем наличие товара по его id:  ${cartModel.hasItemById(apiProducts.items[0].id)}`);
-console.log(`Массив товаров из каталога:  ${customerModel.updateData('card','г. Санкт-Петербург, ул. Конюшенная, 25 ' ,'+79992688546', '')}`);
-console.log(`Массив товаров из каталога:  ${customerModel.getAllData()}`);
-console.log(`Массив товаров из каталога:  ${customerModel.clearData()}`);
-console.log(`Массив товаров из каталога:  ${customerModel.validateData()}`);
+console.log('Очищаем введенные покупателем данные:', customerModel.getAllData());
 
 
 
+order.getItems()
+  .then((items: Item[]) => {
+    return catalogModel.saveItems(items);
+  })
+  .catch((error) => {
+    console.error('Ошибка при получении товаров:', error);
+  });
+console.log('Товары, полученные с сервера:', catalogModel.getItems());
+
+
+    

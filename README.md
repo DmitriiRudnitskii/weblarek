@@ -170,14 +170,26 @@ Presenter - презентер содержит основную логику п
 
 Методы класса:
 
-`updateData(paymentMethod?: TPayment, address?: string, phone?: string, email?: string): void` - сохранение данных в моделию
+`updateData(paymentMethod?: TPayment, address?: string, phone?: string, email?: string): void` - сохранение данных введенных пользователем
 `getAllData(): ICustomer` - получение всех данных покупателя.
 `clearData(): void` - очистка данных покупателя.
 `validateData(): { valid: boolean, errorMessage: string }` - валидация данных, введенных покупателем.
 
+### Слой коммуникации
+Отвечает за получение данных с сервера и отправку данных на сервер.
 
+### класс ApiCommunication
+Использует композицию, чтобы выполнить запрос на сервер и получить с сервера объект с массивом товаров.
 
+Конструктор:
+`api: IApi` - В конструктор передается объект класса Api.
 
+Поля класса:
+`api: IApi` - объект класса Api, используемый для получения и отправки данных с сервера и на сервер.
+
+Методы класса:
+`getProducts(): Promise<Item>` - Метод для получения массива товаров.
+`placeOrder(order: IOrder): Promise<object>` - Метод для отправки данных о покупателе и выбранных товарах.
 
 
 

@@ -21,3 +21,7 @@ export interface ICustomer {
     phone: string | null;
     address: string | null;
 }
+export interface IOrder {
+    customer: ICustomer;
+    items: Item[];
+}
