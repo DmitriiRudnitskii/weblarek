@@ -1,10 +1,10 @@
 import './scss/styles.scss';
-import {Cart} from './components/base/models/cart';
-import {Catalog} from './components/base/models/catalog';
-import {Customer} from './components/base/models/customer';
+import {Cart} from './models/cart';
+import {Catalog} from './models/catalog';
+import {Customer} from './models/customer';
 import { apiProducts } from './utils/data';
 import { Item } from './types';
-import { ApiCommunication } from './components/base/communication/order';
+import { ApiCommunication } from './communication/ApiComunication';
 import { Api } from './components/base/Api';
 import { API_URL } from './utils/constants';
 

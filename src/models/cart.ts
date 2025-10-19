@@ -1,4 +1,4 @@
-import { Item } from "../../../types/index";
+import { Item } from "../types/index";
 
 export class Cart {
     items: Item[] ;
@@ -26,7 +26,7 @@ export class Cart {
     this.items = [];
   }
 
-  getTotalPrice(): number | null {
+  getTotalPrice(): number  {
     return this.items.reduce((total, item) => total + item.price, 0);
   }
 

@@ -1,4 +1,4 @@
-import { Item } from "../../../types";
+import { Item } from "../types";
 export class Catalog  {
      items: Item[];
      itemChecked: Item | null = null;
@@ -19,15 +19,14 @@ export class Catalog  {
          return this.items.find(item => item.id === id);
     }
 
-    setSelectedProduct(itemChecked: Item): void {
+    setSelectedProduct(itemChecked: Item | null): void {
          this.itemChecked = itemChecked;
     }
 
     getSelectedProduct(): Item | null {
          if (this.itemChecked) {
              return this.itemChecked;
-         } else {
-             return null;
-         }
-    }
+    } 
+    return this.itemChecked
+}
 }
