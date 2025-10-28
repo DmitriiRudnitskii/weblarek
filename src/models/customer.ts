@@ -54,4 +54,5 @@ export class Customer implements ICustomer {
     }
 
     return { valid, errors };
+    }
 }

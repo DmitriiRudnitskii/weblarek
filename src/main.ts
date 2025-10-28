@@ -3,7 +3,7 @@ import {Cart} from './models/cart';
 import {Catalog} from './models/catalog';
 import {Customer} from './models/customer';
 import { apiProducts } from './utils/data';
-import { Item } from './types';
+import { Item, TItemsResponse } from './types';
 import { ApiCommunication } from './communication/ApiComunication';
 import { Api } from './components/base/Api';
 import { API_URL } from './utils/constants';
@@ -48,8 +48,8 @@ console.log('Очищаем введенные покупателем данны
 
 
 order.getItems()
-  .then((items: Item[]) => {
-    return catalogModel.saveItems(items);
+  .then((response: TItemsResponse) => {
+    return catalogModel.saveItems(response.items);
   })
   .catch((error) => {
     console.error('Ошибка при получении товаров:', error);
