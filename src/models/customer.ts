@@ -1,12 +1,15 @@
 import { ICustomer, Tpayment, IValidationResult } from "../types/index";
+import { BaseModel } from "./baseModel";
+import { IEvents } from '../components/base/Events';
 
-export class Customer implements ICustomer {
+export class Customer extends BaseModel implements ICustomer {
     protected paymentMethod: Tpayment;
     protected address: string | null = null;
     protected phone: string | null = null;
     protected email: string | null = null;
     
-    constructor(paymentMethod: Tpayment = '') {
+    constructor(events: IEvents, paymentMethod: Tpayment = '') {
+        super(events);
         this.paymentMethod = paymentMethod;
     }
     updateData(data: Partial<ICustomer>): void {
@@ -14,6 +17,8 @@ export class Customer implements ICustomer {
         if (data.address !== undefined) this.address = data.address;
         if (data.phone !== undefined) this.phone = data.phone;
         if (data.email !== undefined) this.email = data.email;
+
+        this.emitChange('customer:updated', this.getAllData());
     }
 
     getAllData(): { paymentMethod: Tpayment, address: string | null, phone: string | null, email: string | null } {
@@ -30,6 +35,8 @@ export class Customer implements ICustomer {
         this.address = null;
         this.phone = null;
         this.email = null;
+
+        this.emitChange('customer:cleared');
     }
 
     validateData(): IValidationResult {
@@ -53,6 +60,8 @@ export class Customer implements ICustomer {
         errors.email = 'Укажите email.';
     }
 
-    return { valid, errors };
+    const result = { valid, errors };
+    this.emitChange('customer:validated', result);
+    return result;
     }
 }

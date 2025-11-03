@@ -39,3 +39,13 @@ export interface IValidationResult {
     valid: boolean;
     errors: { [key: string]: string };
 }
+
+export interface IBasketItem extends Item {
+    quantity?: number;
+}
+
+export interface IBasketData {
+    items: IBasketItem[];
+    total: number;
+}
+

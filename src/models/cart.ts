@@ -1,9 +1,12 @@
 import { Item } from "../types/index";
+import { BaseModel } from "./baseModel";
+import { IEvents } from "../components/base/Events";
 
-export class Cart {
-    items: Item[] ;
+export class Cart extends BaseModel {
+    private items: Item[] ;
 
-  constructor(itemsChecked: Item[]) {
+  constructor(events: IEvents, itemsChecked: Item[]) {
+    super(events);
     this.items = itemsChecked;
   }
 
@@ -11,19 +14,23 @@ export class Cart {
     return this.items;
   }
 
+
   addItem(product: Item): void {
     this.items.push(product);
+    this.emitChange('cart:changed', { items: this.items });
   }
 
   removeItem(item: Item): void {
     const index = this.items.indexOf(item);
     if (index !== -1) {
       this.items.splice(index, 1);
+      this.emitChange('cart:changed', { items: this.items });
     }
   }
 
   clearCart(): void {
     this.items = [];
+    this.emitChange('cart:cleared');
   }
 
   getTotalPrice(): number  {
