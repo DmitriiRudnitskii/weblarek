@@ -2,7 +2,11 @@ import { Component } from '../components/base/Component';
 import { EventEmitter } from '../components/base/Events';
 import { ensureElement } from '../utils/utils';
 
-export class BasketView extends Component<void> {
+interface IBasketViewData {
+    items: HTMLElement[];
+    total: number;
+}
+export class Basket extends Component<IBasketViewData> {
     private list!: HTMLElement;
     private totalPrice!: HTMLElement;
     private orderButton!: HTMLButtonElement;
@@ -20,9 +24,15 @@ export class BasketView extends Component<void> {
         });
     }
 
-    render(items: HTMLElement[], total: number) {
+    render(data?: Partial<IBasketViewData>): HTMLElement {
+        
+        const { items, total } = data as IBasketViewData;
+
         this.list.replaceChildren(...items);
         this.totalPrice.textContent = `${total} синапсов`;
-        return super.render();
+        
+        this.orderButton.disabled = items.length === 0;
+
+        return this.container;
     }
 }

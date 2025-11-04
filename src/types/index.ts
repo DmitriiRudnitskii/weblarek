@@ -25,14 +25,18 @@ export interface Item {
 export type Tpayment = 'card' | 'cash'| '';
 
 export interface ICustomer {
-    paymentMethod: Tpayment;
+    payment: Tpayment;
     email: string | null;
     phone: string | null;
     address: string | null;
 }
 export interface IOrder {
-    customer: ICustomer;
-    items: Item[];
+    total: number;
+    items: string[];
+    payment: Tpayment;
+    email: string | null;
+    phone: string | null;
+    address: string | null;
 }
 
 export interface IValidationResult {

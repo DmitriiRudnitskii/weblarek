@@ -30,7 +30,8 @@ export class Cart extends BaseModel {
 
   clearCart(): void {
     this.items = [];
-    this.emitChange('cart:cleared');
+    console.log('--- Cart.ts: Отправляю событие cart:changed ---');
+    this.emitChange('cart:changed', { items: this.items });
   }
 
   getTotalPrice(): number  {

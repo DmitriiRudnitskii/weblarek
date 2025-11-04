@@ -25,8 +25,13 @@ export class Catalog  extends BaseModel {
     }
 
     setSelectedProduct(itemChecked: Item | null): void {
+        if (this.itemChecked === itemChecked){
+            return
+        }
+
          this.itemChecked = itemChecked;
          this.emitChange('catalog:selected', { item: itemChecked });
+        
     }
 
     getSelectedProduct(): Item | null {

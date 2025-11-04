@@ -3,17 +3,17 @@ import { BaseModel } from "./baseModel";
 import { IEvents } from '../components/base/Events';
 
 export class Customer extends BaseModel implements ICustomer {
-    protected paymentMethod: Tpayment;
+    protected payment: Tpayment;
     protected address: string | null = null;
     protected phone: string | null = null;
     protected email: string | null = null;
     
-    constructor(events: IEvents, paymentMethod: Tpayment = '') {
+    constructor(events: IEvents, payment: Tpayment = '') {
         super(events);
-        this.paymentMethod = paymentMethod;
+        this.payment = payment;
     }
     updateData(data: Partial<ICustomer>): void {
-        if (data.paymentMethod !== undefined) this.paymentMethod = data.paymentMethod;
+        if (data.payment !== undefined) this.payment = data.payment;
         if (data.address !== undefined) this.address = data.address;
         if (data.phone !== undefined) this.phone = data.phone;
         if (data.email !== undefined) this.email = data.email;
@@ -21,9 +21,9 @@ export class Customer extends BaseModel implements ICustomer {
         this.emitChange('customer:updated', this.getAllData());
     }
 
-    getAllData(): { paymentMethod: Tpayment, address: string | null, phone: string | null, email: string | null } {
+    getAllData(): { payment: Tpayment, address: string | null, phone: string | null, email: string | null } {
         return {
-            paymentMethod: this.paymentMethod,
+            payment: this.payment,
             address: this.address,
             phone: this.phone,
             email: this.email
@@ -31,7 +31,7 @@ export class Customer extends BaseModel implements ICustomer {
     }
 
     clearData(): void {
-        this.paymentMethod = '';
+        this.payment = '';
         this.address = null;
         this.phone = null;
         this.email = null;
@@ -43,9 +43,9 @@ export class Customer extends BaseModel implements ICustomer {
     let valid = true;
     const errors: { [key: string]: string } = {};
 
-    if (!this.paymentMethod) {
+    if (!this.payment) {
         valid = false;
-        errors.paymentMethod = 'Не выбран вид оплаты';
+        errors.payment = 'Не выбран вид оплаты';
     }
     if (!this.address) {
         valid = false;

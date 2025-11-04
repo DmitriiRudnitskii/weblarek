@@ -8,12 +8,13 @@ export class ApiCommunication {
     }
 
     async getItems(): Promise<TItemsResponse> {
-        const response = await this.api.get<TItemsResponse>('/product/');
+        const response = await this.api.get<TItemsResponse>(`/product/`);
         return response;
     }
 
     async placeOrder(order: IOrder): Promise<TOrderResponse> {
-        const response = await this.api.post<TOrderResponse>('/order/', order);
+        const response = await this.api.post<TOrderResponse>(`/order/`, order);
         return response;
     }
+        
 }

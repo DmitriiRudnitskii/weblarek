@@ -1,6 +1,6 @@
 import { Component } from '../components/base/Component';
 import { Item } from '../types';
-import { categoryMap } from '../utils/constants';
+import { CDN_URL,categoryMap } from '../utils/constants';
 import { ensureElement } from '../utils/utils';
 import { EventEmitter } from '../components/base/Events';
 
@@ -37,7 +37,7 @@ export abstract class Card extends Component<Item> {
         } else {
         }
         this.category.textContent = product.category;
-        this.setImage(this.image, product.image, product.title);
+        this.setImage(this.image, `${CDN_URL}/${product.image}`, product.title);
     }
 
 }

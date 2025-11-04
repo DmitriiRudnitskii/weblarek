@@ -1,22 +1,37 @@
-import { Card } from '../view/card';
-import { EventEmitter } from '../components/base/Events';
+import { Component } from '../components/base/Component';
 import { Item } from '../types';
-import { ensureElement } from '../utils/utils';
+import { CDN_URL, categoryMap } from '../utils/constants';
 
-export class CatalogCard extends Card {
-    private rootButton: HTMLElement;
-
-    constructor(container: HTMLElement, emitter: EventEmitter) {
-        super(container, emitter);
-        this.rootButton = ensureElement<HTMLElement>('.card', this.container);
-        this.rootButton.addEventListener('click', (e) => {
-            this.emitter.emit('card:select', { productId: this.id });
-        });
+export class CatalogCard extends Component<Item> {
+    
+    
+    constructor(container: HTMLElement) {
+        super(container);
     }
 
-    override setData(product: Item) {
-        super.setData(product);
-        Object.assign(this as object, { id: product.id });
+    
+    render(data?: Partial<Item>): HTMLElement {
+        
+      
+        const item = data as Item;
+
+        const img = this.container.querySelector<HTMLImageElement>('.card__image');
+        const category = this.container.querySelector<HTMLElement>('.card__category');
+        const title = this.container.querySelector<HTMLElement>('.card__title');
+
+        if (img) this.setImage(img, `${CDN_URL}/${item.image}`, item.title);
+        if (title) title.textContent = item.title;
+        
+        if (category) {
+            category.className = 'card__category';
+            
+            const categoryClass = categoryMap[item.category];
+            if (categoryClass) {
+                category.classList.add(categoryClass);
+            }
+        }
+
+        return this.container;
     }
 }
 
