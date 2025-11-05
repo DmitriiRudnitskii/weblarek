@@ -1,48 +1,68 @@
+
 import { Form } from './form';
 import { EventEmitter } from '../components/base/Events';
 import { ensureElement } from '../utils/utils';
+import { Tpayment } from '../types';
 
 export interface IOrderForm {
     address: string;
-    payment: string;
+    payment: string; 
 }
-
 
 export class OrderForm extends Form<IOrderForm> {
     private addressInput!: HTMLInputElement;
+    private paymentButtonsContainer!: HTMLElement;
     private paymentButtons!: NodeListOf<HTMLButtonElement>;
 
-    constructor(container: HTMLElement, emitter: EventEmitter) {
+  constructor(container: HTMLElement, emitter: EventEmitter) {
         super(container, emitter);
         this.addressInput = ensureElement<HTMLInputElement>('[name="address"]', this.form);
-        this.paymentButtons = this.form.querySelectorAll('.order__buttons button');
+        this.paymentButtonsContainer = ensureElement<HTMLElement>('.order__buttons', this.form);
+        this.paymentButtons = this.paymentButtonsContainer.querySelectorAll('button');
 
         this.paymentButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                this.paymentButtons.forEach(b => b.classList.remove('button_alt-active'));
-                (e.currentTarget as HTMLElement).classList.add('button_alt-active');
-                this.onInput();
+                const target = e.currentTarget as HTMLButtonElement;
+                const payment = target.getAttribute('name') as Tpayment;
+
+                this.onInput(payment); 
             });
         });
-
-        this.onInput(); // initial
+    }   
+    
+    protected onInput(payment?: Tpayment) {
+        
+        const currentPayment = payment ?? 
+            Array.from(this.paymentButtons).find(b => b.classList.contains('button_alt-active'))?.getAttribute('name') ?? '';
+        
+        const data: IOrderForm = {
+            address: this.addressInput.value.trim(),
+            payment: currentPayment
+        };
+        
+        this.emitter.emit('order:input', data);
     }
 
-    protected onInput() {
-        const valid = this.validate();
-        this.submitButton.disabled = !valid;
+    
+    setPayment(payment: Tpayment) {
+        this.paymentButtons.forEach(b => {
+            b.classList.toggle('button_alt-active', b.getAttribute('name') === payment);
+        });
     }
 
-    protected validate(): boolean {
-        return this.addressInput.value.trim().length > 0;
+    
+    
+    setValid(isValid: boolean) {
+        this.submitButton.disabled = !isValid;
+    }
+
+    setErrors(errors: { [key: string]: string }) {
+        const addressError = errors.address || '';
+        const paymentError = errors.payment || '';
+        this.errors.textContent = [addressError, paymentError].filter(Boolean).join('; ');
     }
 
     protected onSubmit() {
-        const payment = Array.from(this.paymentButtons).find(b => b.classList.contains('button_alt-active'))?.getAttribute('name') ?? 'card';
-        const data: IOrderForm = {
-            address: this.addressInput.value.trim(),
-            payment
-        };
-        this.emitter.emit('order:next', data);
+        this.emitter.emit('order:next');
     }
 }

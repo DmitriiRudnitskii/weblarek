@@ -16,25 +16,32 @@ export class ContactsForm extends Form<IContactsForm> {
         this.emailInput = ensureElement<HTMLInputElement>('[name="email"]', this.form);
         this.phoneInput = ensureElement<HTMLInputElement>('[name="phone"]', this.form);
 
-        this.onInput();
     }
 
+    
     protected onInput() {
-        const valid = this.validate();
-        this.submitButton.disabled = !valid;
-    }
-
-    protected validate(): boolean {
-        const email = this.emailInput.value.trim();
-        const phone = this.phoneInput.value.trim();
-        return email.length > 3 && phone.length > 3;
-    }
-
-    protected onSubmit() {
         const data: IContactsForm = {
             email: this.emailInput.value.trim(),
             phone: this.phoneInput.value.trim()
         };
-        this.emitter.emit('contacts:submit', data);
+        this.emitter.emit('contacts:input', data);
+    }
+
+   
+    setValid(isValid: boolean) {
+        this.submitButton.disabled = !isValid;
+    }
+
+    
+    setErrors(errors: { [key: string]: string }) {
+        const emailError = errors.email || '';
+        const phoneError = errors.phone || '';
+        this.errors.textContent = [emailError, phoneError].filter(Boolean).join('; ');
+    }
+
+    
+
+    protected onSubmit() {
+        this.emitter.emit('contacts:submit');
     }
 }

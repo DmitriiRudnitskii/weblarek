@@ -14,7 +14,7 @@ export class BasketCard extends Card {
 
         this.deleteButton.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.emitter.emit('card:remove', { productId: (this as any).id });
+            this.emitter.emit('card:remove', { productId: this.id });
         });
     }
 

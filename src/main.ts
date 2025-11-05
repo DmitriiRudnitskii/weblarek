@@ -18,7 +18,7 @@ import { ContactsForm } from './view/contactsModal';
 import { SuccessView } from './view/aggreementModal';
 import { API_URL} from './utils/constants';
 import { cloneTemplate, ensureElement } from './utils/utils';
-import { Item, IOrder, TItemsResponse } from './types';
+import { Item, IOrder, TItemsResponse, Tpayment, IValidationResult, ICustomer } from './types';
 
 
 const events = new EventEmitter();
@@ -44,6 +44,10 @@ const modalContainer = ensureElement<HTMLElement>('#modal-container');
 const galleryView = new GalleryView(galleryContainer);
 const header = new Header(headerContainer, events);
 const modal = new Modal(modalContainer, events);
+const basketView = new Basket(cloneTemplate(basketTemplate), events);
+const orderForm = new OrderForm(cloneTemplate(orderTemplate), events);
+const contactsForm = new ContactsForm(cloneTemplate(contactsTemplate), events);
+const successView = new SuccessView(cloneTemplate(successTemplate), events);
 
 apiCom.getItems()
     .then((response: TItemsResponse) => {
@@ -57,40 +61,36 @@ apiCom.getItems()
 events.on('catalog:updated', () => {
     galleryView.clear();
     const cards: HTMLElement[] = [];
-   
+
     for (const item of catalog.getItems()) {
-        const cardInstance = new CatalogCard(cloneTemplate(cardCatalogTemplate));
-        
+        const cardInstance = new CatalogCard(cloneTemplate(cardCatalogTemplate), events); 
         const cardElement = cardInstance.render(item);
-        
-        cardElement.addEventListener('click', () => {
-            catalog.setSelectedProduct(item);
-        });
-        
         cards.push(cardElement);
-    }
+  }
     galleryView.render(cards);
+});
+
+events.on('card:select', (data: { id: string }) => {
+    const item = catalog.getItemById(data.id);
+    
+    if (item) {
+        catalog.setSelectedProduct(item);
+    }
 });
 
 events.on('catalog:selected', (data: { item: Item | null }) => {
     if (data.item) {
         const item = data.item;
         const previewCard = new PreviewCardModal(cloneTemplate(cardPreviewTemplate), events);
-        
         const isInCart = cart.hasItemById(item.id);
         const cardElement = previewCard.render(item);
         
-        const addButton = cardElement.querySelector<HTMLButtonElement>('.card__button');
-        if (addButton) {
-            addButton.disabled = isInCart;
-            if (isInCart) {
-                addButton.textContent = 'Уже в корзине';
-            }
-        }
+        previewCard.setInCart(isInCart);
         
         modal.open(cardElement);
+
     } else {
-        modal.close();
+       modal.close();
     }
 });
 
@@ -111,7 +111,6 @@ events.on('cart:changed', () => {
 
 
 events.on('header:openBasket', () => {
-    const basketView = new Basket(cloneTemplate(basketTemplate), events);
     const items = cart.getItems();
     const basketCards: HTMLElement[] = [];
     
@@ -121,7 +120,7 @@ events.on('header:openBasket', () => {
         basketCard.setData(item);
         basketCards.push(basketCard.render());
     });
-    
+
     const basketElement = basketView.render({
         items: basketCards,
         total: cart.getTotalPrice()
@@ -133,41 +132,70 @@ events.on('header:openBasket', () => {
 });
 
 events.on('card:remove', (data: { productId: string }) => {
-    const item = catalog.getItemById(data.productId); // Или cart.getItemById, если бы он был
+    const item = catalog.getItemById(data.productId); 
     if (item) {
         cart.removeItem(item);
         events.emit('header:openBasket');
     }
 });
 
+
 events.on('basket:order', () => {
-    const orderForm = new OrderForm(cloneTemplate(orderTemplate), events);
+
+    const currentPayment = customer.getAllData().payment;
+    orderForm.setPayment(currentPayment);
+
+    const validation = customer.validateData();
+    orderForm.setValid(validation.valid);
+    orderForm.setErrors(validation.errors);
+
     modal.open(orderForm.render());
 });
 
-events.on('order:next', (data: { address: string, payment: string }) => {
-    customer.updateData({ 
-        address: data.address, 
-        payment: data.payment as 'card' | 'cash' 
-    });
-    
-    const contactsForm = new ContactsForm(cloneTemplate(contactsTemplate), events);
+events.on('order:input', (data: Partial<ICustomer>) => {
+
+    if (data.payment) {
+        orderForm.setPayment(data.payment as Tpayment);
+    }
+
+    customer.updateData(data);
+
+    customer.validateData();
+});
+
+events.on('order:next', () => {
+    const validation = customer.validateData();
+    contactsForm.setValid(validation.valid);
+    contactsForm.setErrors(validation.errors);
+
     modal.open(contactsForm.render());
+});
+
+events.on('contacts:input', (data: { email: string, phone: string }) => {
+    customer.updateData(data);
+    customer.validateData();
+});
+
+events.on('customer:validated', (result: IValidationResult) => {
+    const isOrderFormValid = !result.errors.address && !result.errors.payment;
+    
+    orderForm.setValid(isOrderFormValid);
+    orderForm.setErrors({ 
+        address: result.errors.address, 
+        payment: result.errors.payment 
+    });
+
+    contactsForm.setValid(result.valid);
+
+    contactsForm.setErrors({ 
+        email: result.errors.email, 
+        phone: result.errors.phone 
+    });
 });
 
 
 events.on('contacts:submit', async (data: { email: string, phone: string }) => {
-    customer.updateData({
-        email: data.email,
-        phone: data.phone
-    });
-
-    const validation = customer.validateData();
-    if (!validation.valid) {
-        console.error("Данные клиента невалидны:", validation.errors);
-        return;
-    }
-
+    
     const customerData = customer.getAllData();
 
     const orderPayload: IOrder = {
@@ -183,8 +211,6 @@ events.on('contacts:submit', async (data: { email: string, phone: string }) => {
     try {
         const response = await apiCom.placeOrder(orderPayload);
         
-
-        const successView = new SuccessView(cloneTemplate(successTemplate), events);
         successView.setMessage(response.total);
         modal.open(successView.render());
         

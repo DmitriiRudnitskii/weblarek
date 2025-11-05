@@ -1,4 +1,6 @@
-import { Card } from './card';
+// Файл: view/cardPreviewModal.ts
+
+import { Card } from './card'; // Убедитесь, что Card импортирован
 import { EventEmitter } from '../components/base/Events';
 import { Item } from '../types';
 import { ensureElement } from '../utils/utils';
@@ -19,15 +21,22 @@ export class PreviewCardModal extends Card {
     }
 
     override setData(product: Item) {
-        super.setData(product);
+        super.setData(product); // Устанавливает id, title, price, image...
         this.description.textContent = product.description ?? '';
-        Object.assign(this as object, { id: product.id });
     }
 
-    override render(data?: Partial<Item>) {
-        if (data) {
-            this.setData(data as Item);
+    setInCart(inCart: boolean) {
+        if (this.addButton) {
+            this.addButton.disabled = inCart;
+            this.addButton.textContent = inCart ? 'Уже в корзине' : 'В корзину';
         }
-        return super.render(data);
     }
+
+    override render(data?: Partial<Item>): HTMLElement {
+        if (data) {
+        this.setData(data as Item);
+    }
+        this.setInCart(false); 
+        return this.container;
+}
 }
