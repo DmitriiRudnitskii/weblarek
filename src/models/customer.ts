@@ -7,18 +7,20 @@ export class Customer extends BaseModel implements ICustomer {
     protected address: string | null = null;
     protected phone: string | null = null;
     protected email: string | null = null;
-    
+
     constructor(events: IEvents, payment: Tpayment = '') {
         super(events);
         this.payment = payment;
     }
+
     updateData(data: Partial<ICustomer>): void {
         if (data.payment !== undefined) this.payment = data.payment;
         if (data.address !== undefined) this.address = data.address;
         if (data.phone !== undefined) this.phone = data.phone;
         if (data.email !== undefined) this.email = data.email;
 
-        this.emitChange('customer:updated', this.getAllData());
+
+        this.emitChange('customer:updated', this.getAllData()); 
     }
 
     getAllData(): { payment: Tpayment, address: string | null, phone: string | null, email: string | null } {
@@ -36,32 +38,33 @@ export class Customer extends BaseModel implements ICustomer {
         this.phone = null;
         this.email = null;
 
-        this.emitChange('customer:cleared');
+       
     }
 
+    
     validateData(): IValidationResult {
-    let valid = true;
-    const errors: { [key: string]: string } = {};
+        let valid = true;
+        const errors: { [key: string]: string } = {};
 
-    if (!this.payment) {
-        valid = false;
-        errors.payment = 'Не выбран вид оплаты';
-    }
-    if (!this.address) {
-        valid = false;
-        errors.address = 'Укажите адрес.';
-    }
-    if (!this.phone) {
-        valid = false;
-        errors.phone = 'Укажите телефон.';
-    }
-    if (!this.email) {
-        valid = false;
-        errors.email = 'Укажите email.';
-    }
+         if (!this.payment) {
+         valid = false;
+         errors.payment = 'Не выбран вид оплаты';
+         }
+         if (!this.address) {
+             valid = false;
+             errors.address = 'Укажите адрес.';
+         }
+         if (!this.phone) {
+             valid = false;
+             errors.phone = 'Укажите телефон.';
+         }
+         if (!this.email) {
+             valid = false;
+             errors.email = 'Укажите email.';
+        }
 
-    const result = { valid, errors };
-    this.emitChange('customer:validated', result);
-    return result;
-    }
+         const result = { valid, errors };
+        
+     return result; 
+  }
 }

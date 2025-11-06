@@ -1,6 +1,5 @@
-// Файл: view/cardPreviewModal.ts
 
-import { Card } from './card'; // Убедитесь, что Card импортирован
+import { Card } from './card';
 import { EventEmitter } from '../components/base/Events';
 import { Item } from '../types';
 import { ensureElement } from '../utils/utils';
@@ -8,6 +7,8 @@ import { ensureElement } from '../utils/utils';
 export class PreviewCardModal extends Card {
     private description!: HTMLElement;
     private addButton!: HTMLButtonElement;
+    
+    private _isInCart: boolean = false;
 
     constructor(container: HTMLElement, emitter: EventEmitter) {
         super(container, emitter);
@@ -16,27 +17,34 @@ export class PreviewCardModal extends Card {
 
         this.addButton.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.emitter.emit('card:addToCart', { productId: this.id });
+            
+            if (this._isInCart) {
+                this.emitter.emit('card:remove', { productId: this.id });
+            } else {
+                this.emitter.emit('card:addToCart', { productId: this.id });
+            }
         });
     }
 
     override setData(product: Item) {
-        super.setData(product); // Устанавливает id, title, price, image...
+        super.setData(product);
         this.description.textContent = product.description ?? '';
     }
 
+    
     setInCart(inCart: boolean) {
+        this._isInCart = inCart; 
         if (this.addButton) {
-            this.addButton.disabled = inCart;
-            this.addButton.textContent = inCart ? 'Уже в корзине' : 'В корзину';
+            this.addButton.textContent = inCart ? 'Удалить из корзины' : 'В корзину';
         }
     }
 
+    
     override render(data?: Partial<Item>): HTMLElement {
         if (data) {
-        this.setData(data as Item);
-    }
+            this.setData(data as Item);
+        }
         this.setInCart(false); 
         return this.container;
-}
+    }
 }
